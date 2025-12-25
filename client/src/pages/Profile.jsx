@@ -18,7 +18,6 @@ function Profile() {
     setFile(file);
     setPreview(URL.createObjectURL(file));
   }
-  console.log(formData);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value, });
@@ -33,7 +32,6 @@ function Profile() {
       let avatarUrl = currentUser.avatar;
 
       if (file) {
-        console.log('file start')
         const formDataCloud = new FormData();
         formDataCloud.append("image", file);
 
@@ -41,8 +39,6 @@ function Profile() {
           method: "POST",
           body: formDataCloud
         });
-
-        console.log(res);
 
         const data = await res.json();
         avatarUrl = data.secure_url;
