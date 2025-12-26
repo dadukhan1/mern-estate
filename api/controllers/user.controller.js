@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 import { deleteOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 import { errorHandler } from "../utils/error.js";
+import Listing from "../models/listing.model.js";
 
 export const test = (req, res) => {
   res.send("duniya");
