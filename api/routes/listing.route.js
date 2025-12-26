@@ -3,6 +3,7 @@ import {
   createListing,
   uploadMultipleImagesController,
   deleteListing,
+  updateListing,
 } from "../controllers/listing.controller.js";
 import { verifyToken } from "../utils/verifyUser.js";
 import { upload } from "../utils/multer.js";
