@@ -1,5 +1,6 @@
 import Listing from "../models/listing.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { deleteOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
+import { errorHandler } from "../utils/error.js";
 
 export const createListing = async (req, res, next) => {
   try {
@@ -40,5 +41,28 @@ export const uploadMultipleImagesController = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const deleteListing = async (req, res, next) => {
+  try {
+    const listing = await Listing.findById(req.params.id);
+    if (!listing) return next(errorHandler(404, "Listing not found!"));
+
+    if (req.user.id !== listing.userRef) {
+      return next(errorHandler(401, "You can only delete your own listings!"));
+    }
+    // ---- Delete Images from Cloudinary ----
+    await Promise.all(
+      listing.imageUrls.map(async (img) => {
+        await deleteOnCloudinary(img.public_id);
+      })
+    );
+    // ---- Delete Listing from DB ----
+    await listing.deleteOne();
+
+    return res.status(200).json("Listing and all images deleted successfully");
+  } catch (error) {
+    next(error);
   }
 };
