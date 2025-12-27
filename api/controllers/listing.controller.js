@@ -69,23 +69,62 @@ export const deleteListing = async (req, res, next) => {
 
 export const updateListing = async (req, res, next) => {
   try {
+    // 1) Load listing
     const listing = await Listing.findById(req.params.id);
     if (!listing) {
-      return next(errorHandler(401, "Listing not found!"));
+      return next(errorHandler(404, "Listing not found!"));
     }
 
-    if (req.user.id != listing.userRef) {
-      return next(errorHandler(401, "You can only delete your own listings!"));
+    // 2) Check ownership (ensure types match by stringifying)
+    if (String(listing.userRef) !== req.user.id) {
+      return next(errorHandler(401, "You can only update your own listings!"));
     }
 
-    const udpatedListing = await Listing.findByIdAndUpdate(
+    // 3) Prepare lists of public_ids
+    const existingImages = Array.isArray(listing.imageUrls)
+      ? listing.imageUrls
+      : [];
+    const incomingImages = Array.isArray(req.body.imageUrls)
+      ? req.body.imageUrls
+      : [];
+
+    // existingPublicIds: public_id values stored in DB (if present)
+    const existingPublicIds = existingImages
+      .map((img) => img && img.public_id)
+      .filter(Boolean);
+
+    // incomingPublicIds: public_id values sent by client (if any)
+    const incomingPublicIds = incomingImages
+      .map((img) => (img && typeof img === "object" ? img.public_id : null))
+      .filter(Boolean);
+
+    // 4) Determine which images were removed on the client
+    const toDelete = existingPublicIds.filter(
+      (id) => !incomingPublicIds.includes(id)
+    );
+
+    // 5) Delete removed images from Cloudinary (log but don't fail whole request)
+    await Promise.all(
+      toDelete.map(async (public_id) => {
+        try {
+          await deleteOnCloudinary(public_id);
+        } catch (err) {
+          console.error("Failed to delete from Cloudinary:", public_id, err);
+        }
+      })
+    );
+
+    // 6) Update listing with new body (expects imageUrls to contain stored objects for saved images)
+    const updatedListing = await Listing.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true }
     );
 
-    res.status(200).json(udpatedListing);
-  } catch (error) {}
+    return res.status(200).json(updatedListing);
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const getListing = async (req, res, next) => {
