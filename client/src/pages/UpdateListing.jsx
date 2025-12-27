@@ -7,9 +7,9 @@ const UpdateListing = () => {
   const { currentUser } = useSelector((s) => s.user);
   const params = useParams();
 
-  const [files, setFiles] = useState([]); // selected File objects (new uploads)
+  const [files, setFiles] = useState([]); // File objects (new uploads)
   const [formData, setFormData] = useState({
-    imageUrls: [],
+    imageUrls: [], // mixture of objects {url, public_id} and blob strings
     name: "",
     description: "",
     address: "",
@@ -22,6 +22,7 @@ const UpdateListing = () => {
     parking: false,
     furnished: false,
   });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -30,8 +31,9 @@ const UpdateListing = () => {
       const res = await fetch(`/api/listing/getListing/${params.listingId}`);
       const data = await res.json();
       if (data.success === false) return console.error(data.message);
-      setFormData((prev) => ({
-        ...prev,
+
+      setFormData((p) => ({
+        ...p,
         ...data,
         imageUrls: Array.isArray(data.imageUrls) ? data.imageUrls : [],
       }));
@@ -41,23 +43,15 @@ const UpdateListing = () => {
 
   const handleChange = (e) => {
     const { id, type, checked, value } = e.target;
-    if (id === "sale" || id === "rent") {
-      setFormData((p) => ({ ...p, type: id }));
-      return;
-    }
-    if (id === "parking" || id === "furnished" || id === "offer") {
-      setFormData((p) => ({ ...p, [id]: checked }));
-      return;
-    }
+    if (id === "sale" || id === "rent")
+      return setFormData((p) => ({ ...p, type: id }));
+    if (id === "parking" || id === "furnished" || id === "offer")
+      return setFormData((p) => ({ ...p, [id]: checked }));
     if (type === "number") setFormData((p) => ({ ...p, [id]: Number(value) }));
     else setFormData((p) => ({ ...p, [id]: value }));
   };
 
-  // normalize entries to simple string URLs
-  const normalizeImageUrls = (arr) =>
-    Array.isArray(arr)
-      ? arr.map((it) => (typeof it === "string" ? it : it?.url || it))
-      : [];
+  const isBlob = (v) => typeof v === "string" && v.startsWith("blob:");
 
   // append selected files (so user can select multiple times)
   const handleFileInputChange = (e) => {
@@ -68,15 +62,13 @@ const UpdateListing = () => {
 
   // create previews and append them to existing previews (don't replace)
   const handlePreview = () => {
-    if (!files.length) return alert("Please select images first");
-    if (
-      files.length +
-        normalizeImageUrls(formData.imageUrls).filter((u) =>
-          u.startsWith("blob:")
-        ).length >
-      6
-    )
+    const existingStoredCount = (formData.imageUrls || []).filter(
+      (it) => typeof it === "object" && it.url
+    ).length;
+    if (existingStoredCount + files.length > 6)
       return alert("Max 6 images allowed");
+    if (!files.length) return alert("Please select images first");
+
     const previews = files.map((f) => URL.createObjectURL(f));
     setFormData((p) => ({
       ...p,
@@ -91,12 +83,12 @@ const UpdateListing = () => {
     const target = imgs[index];
     const src = typeof target === "string" ? target : target?.url || "";
 
-    if (src.startsWith("blob:")) {
-      // find positions of blob previews in the imageUrls list
+    if (isBlob(src)) {
+      // positions of blob previews in the imageUrls list
       const blobIndices = imgs
         .map((it, idx) => {
           const s = typeof it === "string" ? it : it?.url || "";
-          return s.startsWith("blob:") ? idx : -1;
+          return isBlob(s) ? idx : -1;
         })
         .filter((i) => i !== -1);
 
@@ -116,19 +108,21 @@ const UpdateListing = () => {
     e.preventDefault();
     try {
       setError("");
-      const currentUrls = normalizeImageUrls(formData.imageUrls);
-      if (currentUrls.length < 1)
-        return setError("You must upload at least one image.");
+      // stored images are objects with url/public_id; previews are blob strings
+      const storedImages = (formData.imageUrls || []).filter(
+        (it) => typeof it === "object" && it.url
+      );
+      const totalAfter = storedImages.length + files.length;
+      if (totalAfter < 1) return setError("You must have at least one image.");
       if (+formData.regularPrice < +formData.discountPrice)
         return setError("Discount price must be less then regular price");
+      if (totalAfter > 6) return setError("Max 6 images allowed");
 
       setLoading(true);
 
-      // keep stored URLs, remove blob previews
-      const storedUrls = currentUrls.filter((u) => !u.startsWith("blob:"));
-      let finalImageUrls = [...storedUrls];
+      let finalImageUrls = [...storedImages]; // keep objects with public_id
 
-      // upload new files (if any) and append returned URLs
+      // upload new files (if any) and append returned objects ({url, public_id})
       if (files.length > 0) {
         const fd = new FormData();
         files.forEach((f) => fd.append("images", f));
@@ -145,7 +139,7 @@ const UpdateListing = () => {
         finalImageUrls = [...finalImageUrls, ...uploadJson.imageUrls];
       }
 
-      // send update payload
+      // send update payload (imageUrls are objects with url & public_id)
       const payload = {
         name: formData.name,
         description: formData.description,
@@ -214,7 +208,7 @@ const UpdateListing = () => {
           />
 
           <div className="flex gap-6 flex-wrap">
-            <label className="flex items-center gap-2">
+            <label>
               <input
                 id="sale"
                 type="checkbox"
@@ -223,7 +217,7 @@ const UpdateListing = () => {
               />{" "}
               Sell
             </label>
-            <label className="flex items-center gap-2">
+            <label>
               <input
                 id="rent"
                 type="checkbox"
@@ -232,7 +226,7 @@ const UpdateListing = () => {
               />{" "}
               Rent
             </label>
-            <label className="flex items-center gap-2">
+            <label>
               <input
                 id="parking"
                 type="checkbox"
@@ -241,7 +235,7 @@ const UpdateListing = () => {
               />{" "}
               Parking spot
             </label>
-            <label className="flex items-center gap-2">
+            <label>
               <input
                 id="furnished"
                 type="checkbox"
@@ -250,7 +244,7 @@ const UpdateListing = () => {
               />{" "}
               Furnished
             </label>
-            <label className="flex items-center gap-2">
+            <label>
               <input
                 id="offer"
                 type="checkbox"
@@ -324,7 +318,7 @@ const UpdateListing = () => {
 
         <div className="flex flex-col flex-1 gap-4">
           <p className="font-semibold">
-            Images:
+            Images:{" "}
             <span className="font-normal text-gray-600 ml-2">
               The first image will be the cover (max 6)
             </span>
