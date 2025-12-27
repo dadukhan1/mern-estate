@@ -11,13 +11,16 @@ import {
   FaParking,
 } from "react-icons/fa";
 import "swiper/css/bundle";
+import { useSelector } from "react-redux";
+import Contact from "../components/Contact";
 
 const Listing = () => {
   const params = useParams();
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  console.log(listing);
+  const [contact, setContact] = useState(false);
+  const { currentUser } = useSelector((state) => state.user);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -109,6 +112,23 @@ const Listing = () => {
                   {listing.furnished ? "Furnished" : "Unfurnished"}
                 </li>
               </ul>
+              {/* {console.log(
+                currentUser,
+                listing.userRef,
+                "bereak'",
+                currentUser._id
+              )} */}
+              {currentUser &&
+                listing.userRef !== currentUser._id &&
+                !contact && (
+                  <button
+                    onClick={() => setContact(true)}
+                    className="bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 p-3"
+                  >
+                    Contact Landloard
+                  </button>
+                )}
+              {contact && <Contact listing={listing} />}
             </div>
           </>
         )}
