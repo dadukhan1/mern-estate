@@ -182,7 +182,7 @@ export const getListings = async (req, res, next) => {
       .limit(limit)
       .skip(startIndex);
 
-    return res.json(200).json(listings);
+    return res.status(200).json(listings);
   } catch (error) {
     next(error);
   }
