@@ -51,7 +51,7 @@ export const uploadImageController = async (req, res) => {
     const oldAvatar = user.avatarPublicId;
 
     // Upload new image
-    const cloudResponse = await uploadOnCloudinary(req.file.path);
+    const cloudResponse = await uploadOnCloudinary(req.file.buffer);
     if (!cloudResponse) {
       return res.status(500).json({ message: "Cloud upload failed" });
     }

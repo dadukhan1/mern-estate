@@ -12,33 +12,23 @@ cloudinary.config({
 });
 
 
-const uploadOnCloudinary = async (localFilePath) => {
-    if (!localFilePath || !fs.existsSync(localFilePath)) {
-        console.warn("⚠️ File not found, skipping upload:", localFilePath);
-        return null;
-    }
+const uploadOnCloudinary = async (file) => {
+    return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: "image",
+        folder: "mern-estate",  // optional: folder in Cloudinary
+        format: "auto",
+        quality: "auto",
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
 
-    try {
-        const response = await cloudinary.uploader.upload(localFilePath, {
-            resource_type: "image",
-            public_id: `uploaded_${Date.now()}`,
-            fetch_format: "auto",
-            quality: "auto",
-        });
-
-        // Delete the local file after a successful upload
-        fs.unlinkSync(localFilePath);
-
-        return response;
-    } catch (error) {
-        console.warn("⚠️ Cloudinary upload failed, skipping file:", error.message);
-        // Delete the file even if the upload fails
-        if (fs.existsSync(localFilePath)) {
-            fs.unlinkSync(localFilePath);
-            console.log("🗑️ Local file deleted due to upload failure:", localFilePath);
-        }
-        return null;
-    }
+    stream.end(file);
+  });
 };
 
 const deleteOnCloudinary = async (oldFilePath) => {

@@ -18,7 +18,7 @@ export const uploadMultipleImagesController = async (req, res) => {
     }
 
     const uploadPromises = req.files.map((file) =>
-      uploadOnCloudinary(file.path)
+      uploadOnCloudinary(file.buffer)
     );
 
     const uploadedImages = await Promise.all(uploadPromises);
