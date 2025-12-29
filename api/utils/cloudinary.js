@@ -11,7 +11,7 @@ cloudinary.config({
 });
 
 
-export const uploadOnCloudinary = async (buffer) => {
+const uploadOnCloudinary = async (buffer) => {
   return await new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       { folder: "avatars" },
