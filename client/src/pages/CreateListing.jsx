@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 const CreateListing = () => {
+  const apiBase = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
   const { currentUser } = useSelector((state) => state.user);
   const [files, setFiles] = useState([]);
@@ -76,7 +77,7 @@ const CreateListing = () => {
     const imageData = new FormData();
     imageData.append("images", file);
 
-    const res = await fetch("/api/listing/upload-images", {
+    const res = await fetch(`${apiBase}/api/listing/upload-images`, {
       method: "POST",
       body: imageData,
       credentials: "include", // if you're using cookie auth
@@ -106,7 +107,7 @@ const CreateListing = () => {
       const imageData = new FormData();
       [...files].forEach((file) => imageData.append("images", file));
 
-      const uploadRes = await fetch("/api/listing/upload-images", {
+      const uploadRes = await fetch(`${apiBase}/api/listing/upload-images`, {
         method: "POST",
         body: imageData,
         credentials: "include",
@@ -116,7 +117,7 @@ const CreateListing = () => {
       if (!uploadRes.ok) throw new Error(uploadData.message || "Upload failed");
 
       // ---- Now Create Listing ----
-      const res = await fetch("/api/listing/create", {
+      const res = await fetch(`${apiBase}/api/listing/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

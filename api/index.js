@@ -19,7 +19,7 @@ const app = express();
 
 app.use(cors(
     {
-        origin: ['https://mern-estate-frontend-kappa.vercel.app'],
+        origin: ["http://localhost:5173",'https://mern-estate-znph.vercel.app'],
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
     }
 ))
@@ -28,7 +28,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use('/api/user', userRouter);
-app.use('/api/auth', authRouter);
+app.use('/api/auth', authRouter); 
 app.use('/api/listing', listingRouter);
 
 

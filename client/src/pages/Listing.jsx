@@ -15,6 +15,7 @@ import { useSelector } from "react-redux";
 import Contact from "../components/Contact";
 
 const Listing = () => {
+  const apiBase = import.meta.env.VITE_API_URL;
   const params = useParams();
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -26,7 +27,7 @@ const Listing = () => {
     const fetchListing = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/listing/getListing/${params.listingId}`);
+        const res = await fetch(`${apiBase}/api/listing/getListing/${params.listingId}`);
         const data = await res.json();
         if (data.success === false) {
           setError(true);

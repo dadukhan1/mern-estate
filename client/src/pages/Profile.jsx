@@ -15,6 +15,7 @@ import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 
 function Profile() {
+  const apiBase = import.meta.env.VITE_API_URL;
   const { currentUser, loading, error } = useSelector((state) => state.user);
 
   const fileRef = useRef(null);
@@ -48,7 +49,7 @@ function Profile() {
         const formDataCloud = new FormData();
         formDataCloud.append("image", file);
 
-        const res = await fetch("/api/user/upload", {
+        const res = await fetch(`${apiBase}/api/user/upload`, {
           method: "POST",
           body: formDataCloud,
         });
@@ -58,7 +59,7 @@ function Profile() {
         setFile(null);
       }
 
-      const res2 = await fetch(`/api/user/update/${currentUser._id}`, {
+      const res2 = await fetch(`${apiBase}/api/user/update/${currentUser._id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -82,7 +83,7 @@ function Profile() {
   const handleDeleteUser = async () => {
     try {
       dispatch(deleteUserStart());
-      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+      const res = await fetch(`${apiBase}/api/user/delete/${currentUser._id}`, {
         method: "DELETE",
       });
 
@@ -101,7 +102,7 @@ function Profile() {
     try {
       dispatch(signOutUserStart());
 
-      const res = await fetch("/api/auth/signout");
+      const res = await fetch(`${apiBase}/api/auth/signout`);
       if (res.success === false) {
         dispatch(signOutUserFailure(res.message));
         return;
@@ -115,7 +116,7 @@ function Profile() {
   const handleShowListings = async () => {
     try {
       setShowListingError(false);
-      const res = await fetch(`/api/user/listings/${currentUser._id}`);
+      const res = await fetch(`${apiBase}/api/user/listings/${currentUser._id}`);
       const data = await res.json();
 
       if (data.success === false) {
@@ -130,7 +131,7 @@ function Profile() {
 
   const handleListingDelete = async (id) => {
     try {
-      const res = await fetch(`/api/listing/delete/${id}`, {
+      const res = await fetch(`${apiBase}/api/listing/delete/${id}`, {
         method: "DELETE",
       });
 

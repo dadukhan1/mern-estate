@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import ListingItem from "../components/ListingItem";
 
 const Search = () => {
+  const apiBase = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [listing, setListing] = useState(null);
@@ -50,7 +51,7 @@ const Search = () => {
     const fetchListing = async () => {
       setLoading(true);
       const searchQuery = urlParams.toString();
-      const res = await fetch(`/api/listing/get?${searchQuery}`);
+      const res = await fetch(`${apiBase}/api/listing/get?${searchQuery}`);
       console.log(res);
       const data = await res.json();
       if (data.length > 8) {
@@ -119,7 +120,7 @@ const Search = () => {
     const urlParams = new URLSearchParams(location.search);
     urlParams.set("startIndex", startIndex);
     const searchQuery = urlParams.toString();
-    const res = await fetch(`/api/listing/get?${searchQuery}`);
+    const res = await fetch(`${apiBase}/api/listing/get?${searchQuery}`);
     const data = await res.json();
     if (data.length < 9) {
       setShowMore(false);

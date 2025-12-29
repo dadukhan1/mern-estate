@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
 const UpdateListing = () => {
+  const apiBase = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
   const { currentUser } = useSelector((s) => s.user);
   const params = useParams();
@@ -28,7 +29,7 @@ const UpdateListing = () => {
 
   useEffect(() => {
     const fetchListing = async () => {
-      const res = await fetch(`/api/listing/getListing/${params.listingId}`);
+      const res = await fetch(`${apiBase}/api/listing/getListing/${params.listingId}`);
       const data = await res.json();
       if (data.success === false) return console.error(data.message);
 
@@ -126,7 +127,7 @@ const UpdateListing = () => {
       if (files.length > 0) {
         const fd = new FormData();
         files.forEach((f) => fd.append("images", f));
-        const uploadRes = await fetch("/api/listing/upload-images", {
+        const uploadRes = await fetch(`${apiBase}/api/listing/upload-images`, {
           method: "POST",
           body: fd,
           credentials: "include",
@@ -156,7 +157,7 @@ const UpdateListing = () => {
         userRef: currentUser?._id,
       };
 
-      const res = await fetch(`/api/listing/update/${params.listingId}`, {
+      const res = await fetch(`${apiBase}/api/listing/update/${params.listingId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

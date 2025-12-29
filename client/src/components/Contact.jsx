@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const Contact = ({ listing }) => {
+  const apiBase = import.meta.env.VITE_API_URL;
   const [landloard, setLandloard] = useState(null);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     const fetchLandloard = async () => {
       try {
-        const res = await fetch(`/api/user/${listing.userRef}`);
+        const res = await fetch(`${apiBase}/api/user/${listing.userRef}`);
         const data = await res.json();
         setLandloard(data);
       } catch (error) {
