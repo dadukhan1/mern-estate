@@ -1,5 +1,4 @@
 import { v2 as cloudinary } from 'cloudinary';
-import fs from 'fs';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -12,22 +11,16 @@ cloudinary.config({
 });
 
 
-const uploadOnCloudinary = async (file) => {
-    return new Promise((resolve, reject) => {
+export const uploadOnCloudinary = async (buffer) => {
+  return await new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      {
-        resource_type: "image",
-        folder: "mern-estate",  // optional: folder in Cloudinary
-        format: "auto",
-        quality: "auto",
-      },
-      (error, result) => {
-        if (error) reject(error);
+      { folder: "avatars" },
+      (err, result) => {
+        if (err) reject(err);
         else resolve(result);
       }
     );
-
-    stream.end(file);
+    stream.end(buffer);
   });
 };
 
