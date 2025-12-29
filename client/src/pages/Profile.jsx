@@ -52,6 +52,7 @@ function Profile() {
         const res = await fetch(`${apiBase}/api/user/upload`, {
           method: "POST",
           body: formDataCloud,
+          credentials: "include",
         });
 
         const data = await res.json();
@@ -59,13 +60,17 @@ function Profile() {
         setFile(null);
       }
 
-      const res2 = await fetch(`${apiBase}/api/user/update/${currentUser._id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-        }),
-      });
+      const res2 = await fetch(
+        `${apiBase}/api/user/update/${currentUser._id}`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...formData,
+          }),
+        }
+      );
 
       const data = await res2.json();
       if (data.success == false) {
@@ -84,6 +89,7 @@ function Profile() {
     try {
       dispatch(deleteUserStart());
       const res = await fetch(`${apiBase}/api/user/delete/${currentUser._id}`, {
+        credentials: "include",
         method: "DELETE",
       });
 
@@ -102,7 +108,9 @@ function Profile() {
     try {
       dispatch(signOutUserStart());
 
-      const res = await fetch(`${apiBase}/api/auth/signout`);
+      const res = await fetch(`${apiBase}/api/auth/signout`,{
+        credentials: "include",
+      });
       if (res.success === false) {
         dispatch(signOutUserFailure(res.message));
         return;
@@ -116,7 +124,10 @@ function Profile() {
   const handleShowListings = async () => {
     try {
       setShowListingError(false);
-      const res = await fetch(`${apiBase}/api/user/listings/${currentUser._id}`);
+      const res = await fetch(
+        `${apiBase}/api/user/listings/${currentUser._id}`,
+        {credentials: "include"}
+      );
       const data = await res.json();
 
       if (data.success === false) {
@@ -133,6 +144,7 @@ function Profile() {
     try {
       const res = await fetch(`${apiBase}/api/listing/delete/${id}`, {
         method: "DELETE",
+        credentials: "include",
       });
 
       const data = await res.json();

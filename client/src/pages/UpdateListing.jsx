@@ -29,7 +29,9 @@ const UpdateListing = () => {
 
   useEffect(() => {
     const fetchListing = async () => {
-      const res = await fetch(`${apiBase}/api/listing/getListing/${params.listingId}`);
+      const res = await fetch(`${apiBase}/api/listing/getListing/${params.listingId}`,{
+        credentials: "include",
+      });
       const data = await res.json();
       if (data.success === false) return console.error(data.message);
 
@@ -160,6 +162,7 @@ const UpdateListing = () => {
       const res = await fetch(`${apiBase}/api/listing/update/${params.listingId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(payload),
       });
 

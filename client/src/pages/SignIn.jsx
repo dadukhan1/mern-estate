@@ -26,6 +26,7 @@ const SignIn = () => {
       dispatch(signInStart);
       const res = await fetch(`${apiBase}/api/auth/signin`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },

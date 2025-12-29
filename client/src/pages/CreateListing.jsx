@@ -119,6 +119,7 @@ const CreateListing = () => {
       // ---- Now Create Listing ----
       const res = await fetch(`${apiBase}/api/listing/create`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,

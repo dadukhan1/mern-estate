@@ -27,7 +27,9 @@ const Listing = () => {
     const fetchListing = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${apiBase}/api/listing/getListing/${params.listingId}`);
+        const res = await fetch(`${apiBase}/api/listing/getListing/${params.listingId}`,{
+          credentials: "include",
+        });
         const data = await res.json();
         if (data.success === false) {
           setError(true);
